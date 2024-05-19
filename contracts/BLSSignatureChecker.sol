@@ -11,6 +11,23 @@ contract BLSSignatureChecker {
     // gas cost of multiplying 2 pairings
     uint256 internal constant PAIRING_EQUALITY_CHECK_GAS = 120000;
 
+    function verifySignature(
+        bytes32 msgHash,
+        BN254.G1Point memory apkG1, // is the aggregate G1 pubkey of all partners
+        BN254.G2Point memory apkG2, // is the aggregate G2 pubkey of all signers
+        BN254.G1Point memory sigma, // is the aggregate G1 signature of all signers
+        BN254.G1Point[] memory nonSignerPubkeys // is the G1 pubkeys of all nonsigners
+    ) public view returns(bool pairingSuccessful, bool siganatureIsValid) {
+        BN254.G1Point memory apk = BN254.G1Point(0, 0);
+        for (uint256 j = 0; j < nonSignerPubkeys.length; j++) {
+            apk = apk.plus(nonSignerPubkeys[j]);
+        }
+        apk = apk.negate();
+        apk = apk.plus(apkG1);
+
+        return trySignatureAndApkVerification(msgHash, apk, apkG2, sigma);
+    }
+
     /**
      * trySignatureAndApkVerification verifies a BLS aggregate signature and the veracity of a calculated G1 Public key
      * @param msgHash is the hash being signed

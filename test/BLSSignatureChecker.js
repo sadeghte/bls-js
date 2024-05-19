@@ -110,6 +110,44 @@ describe("BLSSignatureChecker", function () {
       expect(pairingSuccessful).to.equal(true, "Pairing not done successfully");
     })
 
+    it("Missing partner should be handle by contract", async function () {
+      const { blsSignatureChecker, owner } = await loadFixture(deployBLSSignatureChecker);
+
+      // const keyPair = bls.createKeyPair("0x123456");
+      const keyPair1 = bls.createKeyPair();
+      const keyPair2 = bls.createKeyPair();
+      // missing partner
+      const keyPair3 = bls.createKeyPair();
+
+      // total publicKey of all partners
+      const totalG1 = bls.aggregatePoints([keyPair1.pubG1, keyPair2.pubG1, keyPair3.pubG1])
+
+      const message = hashStr('sample test to sign')
+
+      const sign1 = bls.signShort(message, keyPair1)
+      const sign2 = bls.signShort(message, keyPair2)
+
+      const totalSig = bls.aggregatePoints([sign1, sign2]);
+
+      // Call the trySignatureAndApkVerification function of the contract
+      const [pairingSuccessful, siganatureIsValid] = await blsSignatureChecker.verifySignature(
+        message,
+        bls.g1ToArgs(
+          bls.aggregatePoints([keyPair1.pubG1, keyPair2.pubG1, keyPair3.pubG1])
+        ),
+        bls.g2ToArgs(
+          bls.aggregatePoints([keyPair1.pubG2, keyPair2.pubG2])
+        ),
+        bls.g1ToArgs(totalSig),
+        [
+          bls.g1ToArgs(keyPair3.pubG1)
+        ],
+      );
+
+      expect(siganatureIsValid).to.equal(true, "Signature is not valid");
+      expect(pairingSuccessful).to.equal(true, "Pairing not done successfully");
+    })
+
 
 
 
