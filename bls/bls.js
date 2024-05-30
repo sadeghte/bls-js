@@ -104,7 +104,7 @@ function createFr(value=undefined) {
     fr.setStr(value);
   }
   else {
-    const r = randHex(12);
+    const r = randHex(64);
     fr.setHashOf(r);
   }
   return fr;

@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "npx hardhat test ./test/BLSSignatureChecker.js"
+    "test": "npx hardhat test ./test/BLSSignatureChecker.js",
+    "deploy": "npx hardhat run --network bnb-test scripts/deploy.js",
+    "verify": "npx hardhat run --network bnb-test scripts/verify.js"
   },
   "keywords": [],
   "author": "",
